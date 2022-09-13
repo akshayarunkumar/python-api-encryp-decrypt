@@ -2,8 +2,10 @@ Hello !
 
 you can clone and deploy this python api. Currently removed active api source.
 
-for encryption passing is - https://deployedsite.com/encrypt/<message to be encrypted>
+for encryption passing is - https://deployedsite.com/encrypt/<messagetobeencrypted>
 
-fro decryption https://deployedsite.com/decrypt/<message to be decrypted>/<key>
+fro decryption https://deployedsite.com/decrypt/<messagetobedecrypted>/<key>
 
 Both results in JSON format as output
+
+Incase of mismatch an exception is thrown
