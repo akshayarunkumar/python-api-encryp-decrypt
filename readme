@@ -1,0 +1,9 @@
+Hello !
+
+you can clone and deploy this python api. Currently removed active api source.
+
+for encryption passing is - https://deployedsite.com/encrypt/<message to be encrypted>
+
+fro decryption https://deployedsite.com/decrypt/<message to be decrypted>/<key>
+
+Both results in JSON format as output
