@@ -1,164 +1,66 @@
-from unittest import result
-import feedparser
-import streamlit as st
+from cgitb import reset
+from cryptography.fernet import Fernet
 from flask import Flask,jsonify
 
-
-
-#st.title("LET'S GO...")
-# my_range=range(1,21)
-# temp= st.sidebar.select_slider("Select number of articles per source",options=my_range,value=5)
-# search_choice = st.sidebar.selectbox('Search By Category:', options=['Top Stories',
-#                                                             'Entertainment',
-#                                                             'Technology',
-#                                                             'Sports',
-#                                                             'Business & Finance',
-#                                                             'Health'], index=0)
-
 app= Flask(__name__)
-search_choice="ok"
-temp=0
-
+# we will be encrypting the below string.
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
 
-def rss_feed_url(url):
+@app.route('/encrypt/<string:message>')
+def encrypt(message):
+    # message = "hello geeks"
 
-        """given an RSS feed url, extract it's entities"""
+# generate a key for encryption and decryption
+# You can use fernet to generate
+# the key or use random key generator
+# here I'm using fernet to generate key
 
-        rss_feed_contents = feedparser.parse(url)
-        news = rss_feed_contents.entries
-        
+    key = Fernet.generate_key()
+    print(key)
     
-        for idx, curr_news in enumerate(news):
-            id = str(idx+1)
-            #val = curr_news['pubDate']
-            summ = curr_news.summary
-           # st.write(f"{curr_news}")
-            title = curr_news['title']
-            article_published_at = curr_news.published
-            actual_link = curr_news['link']
-        #cat = curr_news['pubDate']
-            content = curr_news['summary'].split('<')[0] if curr_news['summary'].split('<')[0] != '' else 'No article summary available, click on the link to read'
-       # pdate = curr_news['pubDate']
-            st.header(f"\n({id}) {title}")
-            st.write(f"{article_published_at}")
-            st.write(f"{content}")
-            #st.write(f"{summ}")
-            st.write(f"Read full story here: {actual_link}")
-        #st.write(f"\n({id}) {title}\n02. News source: {actual_link}\n03. News Summary: {content}")
-            st.write("---------------------------------------------------------")
 
-            if idx>temp-2:
-                break
-# if search_choice == 'Top Stories':
-@app.route('/cat/topstories')
-def topstories():
-    #-------------------------------------------------------------------------------------------------------------
-    # search_choice_sub = st.sidebar.selectbox('Search By Category:', options=['India',
-    #                                                         'World-wide'], index=0)
+# Instance the Fernet class with the key
 
-    # if search_choice_sub == 'India':
-            dict_rss_news_feeds = { 'NDTV - India': "https://feeds.feedburner.com/ndtvnews-india-news"}
-                 
-            title=[]
-            result={}
-            content=""
-            for channel, webpage in dict_rss_news_feeds.items():
-            #   st.title(f"Your News from {channel}: \n")
-            #   rss_feed_url(webpage)
-              rss_feed_contents = feedparser.parse(webpage)
-              news = rss_feed_contents.entries
-              for idx, curr_news in enumerate(news):
-                id = str(idx+1)
-            #val = curr_news['pubDate']
-                summ = curr_news.summary
-           # st.write(f"{curr_news}")
-                title.append(curr_news['title'])
-                content = curr_news['summary']
-                result={
-                    "title":curr_news['title']
-                }
-            #   print("###########################################################################")
-            return jsonify(result)
-    # if search_choice_sub == 'World-wide':
-    #         dict_rss_news_feeds = { 'Times of India': "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
-    #                                 'NY Times': "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-    #                                 'Science Daily':"https://www.sciencedaily.com/rss/all.xml"}
-                 
+    fernet = Fernet(key)
 
-    #         for channel, webpage in dict_rss_news_feeds.items():
-    #           st.title(f"Your News from {channel}: \n")
-    #           rss_feed_url(webpage)
-    #           print("###########################################################################")
+# then use the Fernet class instance
+# to encrypt the string string must
+# be encoded to byte string before encryption
+    encMessage = fernet.encrypt(message.encode())
 
-        
+    print("original string: ", message)
+    print("encrypted string: ", encMessage)
+    prikey=str(key)
+    result={
+        "key":prikey,
+        "message":str(encMessage)
+    }
 
-if search_choice == 'Entertainment':
-   
+# decrypt the encrypted string with the
+# Fernet instance of the key,
+# that was used for encrypting the string
+# encoded byte string is returned by decrypt method,
+# so decode it to string with decode methods
+ 
+    
+    # print("decrypted string: ", decMessage)
+    return jsonify(result)
 
-    dict_rss_news_feeds = { 'TOI -Entertainment': "https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms",
-                            'CNN - Entertainment': "http://rss.cnn.com/rss/edition_entertainment.rss",
-                            'Hollywood - Life':"https://hollywoodlife.com/feed/",
-                            'Zee News Entertainment':"https://zeenews.india.com/rss/entertainment-news.xml"}
-                 
-
-
-    for channel, webpage in dict_rss_news_feeds.items():
-        st.title(f"From {channel}: \n")
-        rss_feed_url(webpage)
-        print("###########################################################################")
-
-if search_choice == 'Sports':
-   
-
-    dict_rss_news_feeds = { 'Zee Sports': "https://zeenews.india.com/rss/sports-news.xml",
-                            'Fox Sports':"https://api.foxsports.com/v1/rss?partnerKey=zBaFxRyGKCfxBagJG9b8pqLyndmvo7UU",
-                            'Rot Wire':"https://www.rotowire.com/rss/articles.php"}
-                 
-
-
-    for channel, webpage in dict_rss_news_feeds.items():
-        st.title(f"From {channel}: \n")
-        rss_feed_url(webpage)
-        print("###########################################################################")
-
-if search_choice == 'Business & Finance':
-   
-
-    dict_rss_news_feeds = { 'Economic Times': "https://economictimes.indiatimes.com/wealth/rssfeeds/837555174.cms",
-                            'India Times':"https://economictimes.indiatimes.com/news/economy/rssfeeds/1373380680.cms",
-                            'Money Control':"https://www.moneycontrol.com/rss/economy.xml"}
-                 
-
-
-    for channel, webpage in dict_rss_news_feeds.items():
-        st.title(f"From {channel}: \n")
-        rss_feed_url(webpage)
-        print("###########################################################################")
-
-if search_choice == 'Technology':
-
-
-    dict_rss_news_feeds = { 'NY -Technology': "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
-                            'CNBC Tech':"https://www.cnbc.com/id/19854910/device/rss/rss.html",
-                            'Wired Tech':"https://www.wired.com/feed/rss"}
-    for channel, webpage in dict_rss_news_feeds.items():
-        st.title(f"From {channel}: \n")
-        rss_feed_url(webpage)
-        print("###########################################################################")
-
-if search_choice == 'Health':
-
-
-    dict_rss_news_feeds = { 'Health News': "http://rssfeeds.webmd.com/rss/rss.aspx?RSSSource=RSS_PUBLIC",
-                            'Medical Xpress':"https://medicalxpress.com/rss-feed/",
-                            'Science Daily':"https://www.sciencedaily.com/rss/top/health.xml"}
-    for channel, webpage in dict_rss_news_feeds.items():
-        st.title(f"From {channel}: \n")
-        rss_feed_url(webpage)
-        print("###########################################################################")
+@app.route('/decrypt/<string:message>/<string:key>')
+def decrypt(message,key):
+    fernet1 = Fernet(key)
+    try:
+           decMessage = fernet1.decrypt(message).decode()
+           result={
+                "key":key,
+                "message":str(decMessage)
+    }
+    except:
+        print("An exception occurred")
+        # return "Key and message"
+        return jsonify("Key and message mismatch")
 
 if __name__=="__main__":
     app.run(debug=True)
